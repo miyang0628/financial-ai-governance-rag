@@ -1,0 +1,7 @@
+﻿Condition,Regulation,N,Regulatory Accuracy,Practical Utility,Completeness,Clarity,Risk Awareness,Overall Score
+Baseline,NIST AI RMF,100,3.795,4.27,3.515,4.29,4.32,4.018
+Rag,NIST AI RMF,100,4.015,4.285,3.805,4.34,4.505,4.183
+Baseline,Korean AI Basic Act,100,3.74,4.08,3.425,4.33,4.15,3.938
+Rag,Korean AI Basic Act,100,4.285,4.27,3.91,4.46,4.32,4.233
+Baseline,EU AI Act,100,3.975,4.16,3.585,4.36,4.305,4.057
+Rag,EU AI Act,100,4.275,4.155,3.845,4.41,4.26,4.182

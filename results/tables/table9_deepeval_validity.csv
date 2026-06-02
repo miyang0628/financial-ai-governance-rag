@@ -1,0 +1,7 @@
+﻿Condition,Regulation,N,AnswerRelevancy,Pass Rate AR (%),Faithfulness,Pass Rate FA (%),Hallucination,Pass Rate HA (%)
+Baseline,NIST AI RMF,30,0.943,100.0,N/A,N/A,N/A,N/A
+Baseline,Korean AI Basic Act,30,0.972,100.0,N/A,N/A,N/A,N/A
+Baseline,EU AI Act,30,0.956,100.0,N/A,N/A,N/A,N/A
+RAG,NIST AI RMF,30,0.972,100.0,0.993,100.0,N/A,N/A
+RAG,Korean AI Basic Act,29,0.959,100.0,0.863,96.6,N/A,N/A
+RAG,EU AI Act,30,0.944,100.0,0.916,100.0,N/A,N/A

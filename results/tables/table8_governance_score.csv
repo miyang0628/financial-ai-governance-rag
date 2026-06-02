@@ -1,0 +1,9 @@
+﻿Condition,Regulation,N,G1 Accuracy,G2 Safety,G3 Transparency,G4 Compliance,Governance Score,Judge Score,Composite Score
+Baseline,NIST AI RMF,100,0.672,0.932,0.744,0.718,0.764,0.755,0.761
+Rag,NIST AI RMF,100,0.664,0.938,0.784,0.774,0.785,0.796,0.788
+Baseline,Korean AI Basic Act,100,0.66,0.928,0.716,0.722,0.753,0.735,0.748
+Rag,Korean AI Basic Act,100,0.726,0.958,0.92,0.838,0.855,0.808,0.841
+Baseline,EU AI Act,100,0.694,0.936,0.754,0.756,0.782,0.764,0.777
+Rag,EU AI Act,100,0.724,0.924,0.864,0.826,0.829,0.796,0.819
+Baseline,Overall,300,0.675,0.932,0.738,0.732,0.766,0.751,0.762
+Rag,Overall,300,0.705,0.94,0.856,0.813,0.823,0.8,0.816

@@ -1,0 +1,10 @@
+﻿Regulation,Difficulty,Baseline,RAG,Δ,N
+NIST AI RMF,basic,0.733,0.789,0.056,18
+NIST AI RMF,intermediate,0.749,0.762,0.013,47
+NIST AI RMF,advanced,0.743,0.811,0.069,35
+Korean AI Basic Act,basic,0.714,0.914,0.2,21
+Korean AI Basic Act,intermediate,0.714,0.925,0.212,51
+Korean AI Basic Act,advanced,0.721,0.914,0.193,28
+EU AI Act,basic,0.747,0.88,0.133,15
+EU AI Act,intermediate,0.735,0.846,0.112,52
+EU AI Act,advanced,0.788,0.885,0.097,33

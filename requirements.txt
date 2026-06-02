@@ -1,0 +1,33 @@
+# Core
+jupyter
+notebook
+ipykernel
+
+# Data
+pandas
+numpy
+python-dotenv
+
+# LLM / API
+openai>=1.30.0
+
+# RAG / Vector DB
+langchain
+langchain-openai
+langchain-community
+chromadb
+faiss-cpu
+tiktoken
+
+# Evaluation
+deepeval
+ragas
+
+# Visualization
+matplotlib
+seaborn
+plotly
+
+# Utilities
+tqdm
+scikit-learn

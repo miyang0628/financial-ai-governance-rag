@@ -1,0 +1,6 @@
+﻿Metric Pair,Pearson r,N
+AnswerRelevancy ↔ G1 Accuracy,0.1057,90
+Faithfulness    ↔ G3 Transparency,-0.1324,90
+Hallucination   ↔ G1 Accuracy,N/A (no variance),90
+AnswerRelevancy ↔ Governance Score,0.0332,90
+Faithfulness    ↔ Governance Score,-0.0593,90

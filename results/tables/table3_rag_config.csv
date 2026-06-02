@@ -1,0 +1,4 @@
+﻿Regulation,MD File,Chunks,Avg Chars,Min Chars,Max Chars,Embed Model,Persist Dir,Chunking Strategy,Top-k Retrieval,Vector Store
+NIST AI RMF,nist_rmf_md.md,11,3256,256,7264,text-embedding-3-small,../vectordb\nist,MarkdownHeaderTextSplitter,3,ChromaDB (persistent)
+Korean AI Basic Act,kr_aibasicact_md.md,17,1643,322,4248,text-embedding-3-small,../vectordb\kr_aibasicact,MarkdownHeaderTextSplitter,3,ChromaDB (persistent)
+EU AI Act,eu_aiact_articles.md,23,2352,331,4525,text-embedding-3-small,../vectordb\eu_aiact,MarkdownHeaderTextSplitter,3,ChromaDB (persistent)
