@@ -1,6 +1,11 @@
+확장 실험 내용을 반영해서 README를 업데이트해 드립니다.
+
+```markdown
 # LLM-Powered AI Governance Support Chatbot for Financial Institutions
 
-> An LLM-based RAG chatbot for financial institution AI Review Committees, integrating three AI governance frameworks: NIST AI RMF 1.0, EU AI Act (2024/1689), and Korean AI Basic Act.
+> An LLM-based RAG chatbot for financial institution AI Review Committees,
+> integrating three AI governance frameworks: NIST AI RMF 1.0,
+> EU AI Act (Regulation 2024/1689), and Korean AI Basic Act (Law No. 21311).
 
 ---
 
@@ -13,13 +18,21 @@
 
 ## 🔍 Overview
 
-This repository contains the full experimental pipeline for an LLM-powered RAG chatbot designed to support AI governance decision-making in financial institutions. The system integrates three regulatory frameworks and evaluates chatbot responses across a four-axis governance evaluation framework (G1~G4).
+This repository contains the full experimental pipeline for an LLM-powered
+RAG chatbot designed to support AI governance decision-making in financial
+institutions. The system integrates three regulatory frameworks and evaluates
+chatbot responses across a four-axis governance evaluation framework (G1–G4).
 
 **Key contributions:**
-- A **cross-regulatory mapping framework** across 18 governance dimensions (NIST AI RMF × EU AI Act × Korean AI Basic Act)
-- A **domain-specific Q&A dataset** (N=300) covering financial AI governance scenarios
-- A **four-axis governance evaluation framework** (G1: Accuracy, G2: Safety, G3: Transparency, G4: Compliance)
-- Empirical comparison of **Baseline vs. RAG** inference conditions across three regulatory corpora
+- A **cross-regulatory mapping framework** across 18 governance dimensions
+  (NIST AI RMF × EU AI Act × Korean AI Basic Act)
+- A **domain-specific Q&A dataset** (N=300) covering financial AI governance
+  scenarios across three regulatory frameworks
+- A **four-axis governance evaluation framework**
+  (G1: Accuracy, G2: Safety, G3: Transparency, G4: Compliance)
+- **Extended comparative experiment** across six retrieval conditions:
+  Baseline, RAG (k=1/3/5), RAG+Query Rewriting, RAG+Re-ranking
+- **Model-scale comparison**: gpt-4o-mini vs. gpt-4o (n=90 stratified sample)
 
 ---
 
@@ -29,29 +42,35 @@ This repository contains the full experimental pipeline for an LLM-powered RAG c
 financial_ai_governance/
 │
 ├── data/
-│   ├── raw/                          # Original Q&A JSON files (N=300)
+│   ├── raw/                            # Original Q&A JSON files (N=300)
 │   │   ├── nist_dataset_001_050.json
 │   │   ├── nist_dataset_051_100.json
 │   │   ├── kr_aibasicact_dataset_101_150.json
 │   │   ├── kr_aibasicact_dataset_151_200.json
 │   │   ├── eu_aiact_dataset_201_250.json
 │   │   └── eu_aiact_dataset_251_300.json
-│   ├── processed/                    # Merged dataset (output of Notebook 01)
-│   └── regulations/                  # Regulatory source documents (English MD)
+│   ├── processed/                      # Merged dataset (output of Notebook 01)
+│   └── regulations/                    # Regulatory source documents (English MD)
 │       ├── nist_rmf_md.md
 │       ├── kr_aibasicact_md.md
 │       └── eu_aiact_articles.md
 │
 ├── notebooks/
-│   ├── 01_data_merge_and_eda.ipynb   # Dataset merge & exploratory analysis
-│   ├── 02_rag_pipeline.ipynb         # ChromaDB vector store construction
-│   ├── 03_llm_inference.ipynb        # Baseline & RAG inference (gpt-4o-mini)
-│   ├── 04_evaluation_g1_g4.ipynb     # G1~G4 automated evaluation
-│   ├── 05_deepeval_validation.ipynb  # DeepEval validity verification
-│   ├── 06_llm_as_judge.ipynb         # LLM-as-Judge quality evaluation
-│   └── 07_governance_score.ipynb     # Composite governance score & visualization
+│   │── 01_data_merge_and_eda.ipynb     # Dataset merge & exploratory analysis
+│   ├── 02_rag_pipeline.ipynb           # ChromaDB vector store construction
+│   ├── 03_llm_inference.ipynb          # Baseline & RAG (k=3) inference
+│   ├── 04_evaluation_g1_g4.ipynb       # G1–G4 automated evaluation (primary)
+│   ├── 05_deepeval_validation.ipynb    # DeepEval validity verification
+│   ├── 06_llm_as_judge.ipynb          # LLM-as-Judge quality evaluation
+│   ├── 07_governance_score.ipynb       # Composite score & visualization
+│   ├── 08_evaluator_robustness.ipynb   # Inter-evaluator robustness check
+│   ├── 09_rag_topk_variants.ipynb      # Top-k ablation (k=1, k=5)
+│   ├── 10_rag_query_rewriting.ipynb    # RAG + Query Rewriting condition
+│   ├── 11_rag_model_comparison.ipynb   # Model comparison (gpt-4o-mini vs gpt-4o)
+│   ├── 12_rag_reranking.ipynb          # RAG + Cross-encoder Re-ranking
+│   └── 13_extended_evaluation.ipynb    # Extended G1–G4 evaluation & ranking
 │
-├── prompts/                          # Prompt templates
+├── prompts/                            # Prompt templates
 │   ├── system_prompt_chatbot.txt
 │   ├── eval_prompt_g1_accuracy.txt
 │   ├── eval_prompt_g2_safety.txt
@@ -59,60 +78,87 @@ financial_ai_governance/
 │   ├── eval_prompt_g4_compliance.txt
 │   └── llm_as_judge_prompt.txt
 │
-├── src/                              # Utility modules
+├── src/                                # Utility modules
 │   ├── data_loader.py
 │   ├── rag_builder.py
 │   ├── llm_client.py
 │   ├── evaluator.py
 │   └── visualizer.py
 │
-├── results/                          # Experimental outputs (generated)
-│   ├── responses/                    # LLM responses (baseline & RAG)
-│   ├── scores/                       # G1~G4, DeepEval, LLM-as-Judge scores
-│   ├── tables/                       # Paper tables (Table 2~9)
-│   └── figures/                      # Paper figures (Figure 2~12)
+├── results/                            # Experimental outputs (generated)
+│   ├── responses/                      # LLM responses — all conditions
+│   │   ├── responses_baseline.json
+│   │   ├── responses_rag.json          # RAG k=3 (primary)
+│   │   ├── responses_rag_k1.json
+│   │   ├── responses_rag_k5.json
+│   │   ├── responses_rag_rewrite.json
+│   │   ├── responses_rag_rerank.json
+│   │   ├── responses_rag_gpt4o.json
+│   │   └── responses_rag_mini_sample.json
+│   ├── scores/                         # Evaluation scores
+│   │   ├── scores_all.csv              # Primary experiment (Baseline + RAG k=3)
+│   │   ├── scores_extended.csv         # Extended conditions
+│   │   └── scores_merged.csv           # All conditions merged
+│   ├── tables/                         # Paper tables (CSV)
+│   └── figures/                        # Paper figures (PDF + PNG)
 │
-├── vectordb/                         # ChromaDB persistent stores (generated)
+├── vectordb/                           # ChromaDB persistent stores (generated)
 │
-├── .env.example                      # Environment variable template
-├── requirements_llm.txt              # Dependencies for llm_env
-├── requirements_deepeval.txt         # Dependencies for deepeval_env
+├── .env.example                        # Environment variable template
+├── requirements_llm.txt                # Dependencies for llm_env
+├── requirements_deepeval.txt           # Dependencies for deepeval_env
 └── README.md
 ```
 
 ---
 
-## 🧪 Experimental Setup
+## 🧪 Experimental Conditions
+
+| Condition | N | Description |
+|---|---|---|
+| Baseline | 300 | gpt-4o-mini, parametric knowledge only (no retrieval) |
+| RAG (k=1) | 300 | RAG with top-1 retrieved chunk |
+| RAG (k=3) | 300 | RAG with top-3 chunks — **primary condition** |
+| RAG (k=5) | 300 | RAG with top-5 chunks |
+| RAG + Query Rewriting | 300 | LLM rewrites query before retrieval (top-3) |
+| RAG + Re-ranking | 300 | Retrieve top-5, cross-encoder re-ranks to top-3 |
+| RAG gpt-4o-mini (n=90) | 90 | Stratified sample, RAG k=3, gpt-4o-mini |
+| RAG gpt-4o (n=90) | 90 | Stratified sample, RAG k=3, gpt-4o |
+
+**Shared configuration across all conditions:**
 
 | Item | Configuration |
 |---|---|
-| LLM | gpt-4o-mini |
+| LLM | gpt-4o-mini (gpt-4o for model comparison) |
 | Embedding | text-embedding-3-small |
 | Vector DB | ChromaDB (persistent) |
-| Chunking | MarkdownHeaderTextSplitter |
-| RAG Top-k | 3 |
+| Chunking | MarkdownHeaderTextSplitter (section/article level) |
 | Temperature | 0.0 |
-| Evaluation | G1~G4 automated + DeepEval + LLM-as-Judge |
-| Dataset | N=300 (100 per regulation) |
-| Conditions | Baseline (no RAG) vs. RAG |
+| Max tokens | 1,000 |
+| Re-ranker | cross-encoder/ms-marco-MiniLM-L-6-v2 (local) |
 
 ---
 
 ## 📊 Dataset
 
-The Q&A dataset (N=300) covers three regulatory frameworks across six financial domains:
+The Q&A dataset (N=300) covers three regulatory frameworks
+across six financial domains.
 
-| Regulation | N | Difficulty | Financial Domain |
+| Regulation | N | Difficulty Distribution | Avg GT Length |
 |---|---|---|---|
-| NIST AI RMF 1.0 | 100 | basic/intermediate/advanced | lending, insurance, investment, fraud, compliance, common |
-| Korean AI Basic Act | 100 | basic/intermediate/advanced | lending, insurance, investment, fraud, compliance, common |
-| EU AI Act (2024/1689) | 100 | basic/intermediate/advanced | lending, insurance, investment, fraud, compliance, common |
+| NIST AI RMF 1.0 | 100 | Basic 18% / Inter. 47% / Adv. 35% | 1,308 chars |
+| Korean AI Basic Act | 100 | Basic 21% / Inter. 51% / Adv. 28% | 1,597 chars |
+| EU AI Act (2024/1689) | 100 | Basic 15% / Inter. 52% / Adv. 33% | 1,882 chars |
 
-Each record contains: `id`, `scenario_id`, `regulation`, `function`, `category`, `subcategory`, `difficulty`, `financial_domain`, `risk_level`, `source_section`, `question`, `ground_truth`, `legal_basis`, `governance_axis`, `notes`
+Each record contains:
+`id`, `scenario_id`, `regulation`, `function`, `category`,
+`subcategory`, `difficulty`, `financial_domain`, `risk_level`,
+`source_section`, `question`, `ground_truth`, `legal_basis`,
+`governance_axis`, `notes`
 
 ---
 
-## 🔬 Governance Evaluation Framework (G1~G4)
+## 🔬 Governance Evaluation Framework (G1–G4)
 
 | Axis | Name | Weight | Description |
 |---|---|---|---|
@@ -121,34 +167,60 @@ Each record contains: `id`, `scenario_id`, `regulation`, `function`, `category`,
 | G3 | Transparency | 0.25 | Regulatory citation accuracy, AI disclosure |
 | G4 | Compliance | 0.20 | Regulatory requirement coverage |
 
-**Composite Score:** `governance_score × 0.70 + judge_score_norm × 0.30`
+**Composite Score (primary experiment):**
+`S_comp = 0.70 × S_gov + 0.30 × S_judge_norm`
+
+where `S_gov = 0.30·G1 + 0.25·G2 + 0.25·G3 + 0.20·G4`
+
+Extended conditions are reported using `S_gov` alone.
 
 ---
 
 ## 📈 Key Results
 
-### Composite Governance Score (Baseline vs. RAG)
+### Primary Experiment: Baseline vs. RAG (k=3)
 
 | Condition | NIST AI RMF | Korean AI Basic Act | EU AI Act | Overall |
 |---|---|---|---|---|
 | Baseline | 0.761 | 0.748 | 0.777 | 0.762 |
-| RAG | 0.788 | 0.841 | 0.819 | **0.816** |
-| Δ | +0.027 | +0.093 | +0.042 | **+0.054** |
+| RAG (k=3) | 0.788 | 0.841 | 0.819 | **0.816** |
+| Δ | +0.027 | +0.093 | +0.042 | **+0.054 (+7.10%)** |
 
-**Overall RAG improvement: +7.10%**
+### Extended Comparison: All Conditions (S_gov, N=300)
 
-### G-Axis Highlights
+| Condition | S_gov | Δ vs Baseline |
+|---|---|---|
+| Baseline | 0.766 | --- |
+| RAG (k=1) | 0.782 | +0.016 |
+| RAG (k=3) | 0.823 | +0.057 |
+| **RAG (k=5)** | **0.838** | **+0.072** |
+| RAG + Rewrite | 0.817 | +0.051 |
+| RAG + Rerank | 0.815 | +0.049 |
 
-- **G3 Transparency** showed the largest RAG improvement (Korean AI Basic Act: Δ+0.204)
-- **G2 Safety** was consistently high across both conditions (Baseline: 0.928~0.936)
-- **Korean AI Basic Act** benefited most from RAG across all axes — supporting the necessity of multi-regulatory integration
+**Key finding:** Retrieval depth (top-k) is the dominant
+performance driver. Query rewriting and re-ranking offer
+negligible benefit over RAG (k=3) under section-level chunking,
+because chunk granularity is the binding constraint.
 
-### DeepEval Validity (N=180, stratified sample)
+### Model-Scale Comparison (RAG k=3, n=90)
 
-| Condition | AnswerRelevancy | Pass Rate | Faithfulness (RAG) | Pass Rate |
+| Model | G1 | G2 | G3 | G4 | S_gov |
+|---|---|---|---|---|---|
+| gpt-4o-mini | 0.724 | 0.949 | 0.867 | 0.831 | **0.837** |
+| gpt-4o | 0.707 | 0.904 | 0.862 | 0.793 | 0.812 |
+
+Note: G2 difference is attributable to evaluator-specific
+inflation (same model as generator and judge), not genuine
+safety guidance quality. G3 Transparency scores are nearly
+identical (0.867 vs. 0.862), confirming that citation accuracy
+is retrieval-driven rather than model-scale-driven.
+
+### DeepEval Validity (n=180, primary experiment)
+
+| Condition | AnswerRelevancy | Pass Rate | Faithfulness | Pass Rate |
 |---|---|---|---|---|
-| Baseline | 0.943~0.972 | 100% | N/A | N/A |
-| RAG | 0.944~0.972 | 100% | 0.863~0.993 | 96.6~100% |
+| Baseline | 0.943–0.972 | 100% | N/A | N/A |
+| RAG (k=3) | 0.944–0.972 | 100% | 0.863–0.993 | 96.6–100% |
 
 ---
 
@@ -157,107 +229,175 @@ Each record contains: `id`, `scenario_id`, `regulation`, `function`, `category`,
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/[anonymous]/[repository-name].git
-cd [repository-name]
+git clone https://github.com/miyang0628/financial-ai-governance-rag.git
+cd financial-ai-governance-rag
 ```
 
-### 2. Environment setup (Windows Anaconda)
+### 2. Environment setup
 
 Two separate conda environments are required:
 
 ```bash
-# Environment 1: LLM inference & evaluation (Notebooks 01~04, 06~07)
+# Environment 1: LLM inference & evaluation
+# (Notebooks 01–04, 06–13)
 conda create -n llm_env python=3.11 -y
 conda activate llm_env
-pip install jupyter notebook ipykernel pandas numpy python-dotenv tqdm scikit-learn "openai>=1.30.0" langchain langchain-openai langchain-community langchain-text-splitters langchain-chroma chromadb faiss-cpu tiktoken matplotlib seaborn plotly
-python -m ipykernel install --user --name llm_env --display-name "Python (llm_env)"
+pip install jupyter notebook ipykernel pandas numpy \
+    python-dotenv tqdm scikit-learn \
+    "openai>=1.30.0" \
+    langchain langchain-openai langchain-community \
+    langchain-text-splitters langchain-chroma \
+    chromadb faiss-cpu tiktoken \
+    matplotlib seaborn plotly \
+    sentence-transformers
+python -m ipykernel install --user \
+    --name llm_env --display-name "Python (llm_env)"
 
 # Environment 2: DeepEval validation (Notebook 05)
 conda create -n deepeval_env python=3.11 -y
 conda activate deepeval_env
-pip install jupyter notebook ipykernel pandas numpy python-dotenv tqdm "openai>=1.30.0" deepeval
-python -m ipykernel install --user --name deepeval_env --display-name "Python (deepeval_env)"
+pip install jupyter notebook ipykernel pandas numpy \
+    python-dotenv tqdm "openai>=1.30.0" deepeval
+python -m ipykernel install --user \
+    --name deepeval_env --display-name "Python (deepeval_env)"
 ```
 
 ### 3. Configure API key
 
 ```bash
 cp .env.example .env
-# Edit .env and add your OpenAI API key:
+# Edit .env:
 # OPENAI_API_KEY=sk-...
 # LLM_MODEL=gpt-4o-mini
 ```
 
 ### 4. Run notebooks in order
 
+#### Primary experiment (Notebooks 01–08)
+
 | Notebook | Kernel | Description |
 |---|---|---|
 | 01_data_merge_and_eda | llm_env | Dataset merge & EDA |
 | 02_rag_pipeline | llm_env | Build ChromaDB vector stores |
-| 03_llm_inference | llm_env | Run Baseline & RAG inference |
-| 04_evaluation_g1_g4 | llm_env | G1~G4 automated evaluation |
+| 03_llm_inference | llm_env | Baseline & RAG (k=3) inference |
+| 04_evaluation_g1_g4 | llm_env | G1–G4 automated evaluation |
 | 05_deepeval_validation | **deepeval_env** | DeepEval validity check |
 | 06_llm_as_judge | llm_env | LLM-as-Judge quality evaluation |
 | 07_governance_score | llm_env | Composite score & visualization |
+| 08_evaluator_robustness | llm_env | Inter-evaluator robustness check |
+
+#### Extended experiment (Notebooks 09–13)
+
+| Notebook | Kernel | Description |
+|---|---|---|
+| 09_rag_topk_variants | llm_env | Top-k ablation: k=1 and k=5 |
+| 10_rag_query_rewriting | llm_env | RAG + LLM query rewriting |
+| 11_rag_model_comparison | llm_env | gpt-4o-mini vs. gpt-4o (n=90) |
+| 12_rag_reranking | llm_env | RAG + cross-encoder re-ranking |
+| 13_extended_evaluation | llm_env | Extended G1–G4 evaluation & ranking |
+
+> **Note:** Notebooks 09–12 must be run before 13.
+> Notebook 03 must be run before 09–12 (shares vector stores).
 
 ---
 
 ## 💰 Estimated API Cost
 
-| Notebook | API Calls | Tokens | Estimated Cost |
-|---|---|---|---|
-| 03 Inference (Baseline) | 300 | 188,812 | $0.03 |
-| 03 Inference (RAG) | 300 | 613,318 | $0.09 |
-| 04 G1~G4 Evaluation | 2,400 | ~480,000 | ~$0.07 |
-| 05 DeepEval | ~540 | ~180,000 | ~$0.03 |
-| 06 LLM-as-Judge | 600 | 799,653 | $0.12 |
-| **Total** | **~4,140** | **~2,260,000** | **~$0.34** |
+### Primary experiment (Notebooks 01–08)
 
-*Based on gpt-4o-mini pricing as of 2025.*
+| Notebook | Tokens | Est. Cost |
+|---|---|---|
+| 03 Inference — Baseline | 188,812 | $0.03 |
+| 03 Inference — RAG (k=3) | 613,318 | $0.09 |
+| 04 G1–G4 Evaluation | ~480,000 | ~$0.07 |
+| 05 DeepEval | ~180,000 | ~$0.03 |
+| 06 LLM-as-Judge | 799,653 | $0.12 |
+| **Primary Total** | **~2,260,000** | **~$0.34** |
+
+### Extended experiment (Notebooks 09–13)
+
+| Notebook | Tokens | Est. Cost |
+|---|---|---|
+| 09 RAG k=1 | 319,664 | $0.05 |
+| 09 RAG k=5 | 908,394 | $0.14 |
+| 10 RAG + Rewrite | 697,550 | $0.10 |
+| 11 RAG gpt-4o (n=90) | 184,800 | $0.92 |
+| 12 RAG + Rerank | 605,759 | $0.09 |
+| 13 Extended Evaluation | ~1,104,000 | ~$0.17 |
+| **Extended Total** | **~3,820,000** | **~$1.47** |
+
+| **Grand Total** | **~6,080,000** | **~$1.81** |
+
+*gpt-4o-mini: $0.15/1M tokens (blended).
+gpt-4o: $5.00/1M tokens (blended). As of 2025.*
 
 ---
 
 ## 📋 Dependencies
 
-**llm_env:**
+**llm_env** (Notebooks 01–04, 06–13):
 ```
 openai>=1.30.0
-langchain, langchain-openai, langchain-community
-langchain-text-splitters, langchain-chroma
-chromadb, faiss-cpu, tiktoken
-pandas, numpy, matplotlib, seaborn, plotly
-python-dotenv, tqdm, scikit-learn
+langchain langchain-openai langchain-community
+langchain-text-splitters langchain-chroma
+chromadb faiss-cpu tiktoken
+pandas numpy matplotlib seaborn plotly
+python-dotenv tqdm scikit-learn
+sentence-transformers
 ```
 
-**deepeval_env:**
+**deepeval_env** (Notebook 05):
 ```
 openai>=1.30.0
 deepeval
-pandas, numpy, python-dotenv, tqdm
+pandas numpy python-dotenv tqdm
 ```
 
 ---
 
 ## ⚠️ Notes
 
-- `vectordb/` directory is generated by Notebook 02 and excluded from the repository (`.gitignore`)
-- `results/` directory is generated by Notebooks 03~07 and excluded from the repository
+- `vectordb/` is generated by Notebook 02 and excluded
+  from the repository (`.gitignore`)
+- `results/` is generated by Notebooks 03–13 and excluded
+  from the repository
 - All notebooks use `temperature=0.0` for reproducibility
-- The dataset uses financial AI governance scenarios (S001~S091) mapped across three regulations
+- The re-ranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`)
+  downloads automatically via `sentence-transformers`
+  on first use (no additional API cost)
+- Notebook 11 (gpt-4o comparison) incurs ~$0.92 in API cost;
+  confirm before running
+- The Korean AI Basic Act source corpus is an interpretive
+  English translation prepared by the authors; no official
+  English translation exists
 
 ---
 
 ## 📜 License
 
 This repository is released for academic reproducibility purposes.
-The regulatory source documents (NIST AI RMF, EU AI Act, Korean AI Basic Act) are publicly available government documents.
+The regulatory source documents (NIST AI RMF, EU AI Act,
+Korean AI Basic Act) are publicly available government documents.
 
 ---
 
 ## 🔗 References
 
-- NIST. (2023). *AI Risk Management Framework (AI RMF 1.0)*. https://doi.org/10.6028/NIST.AI.100-1
-- European Parliament. (2024). *Regulation (EU) 2024/1689* (EU AI Act). Official Journal of the EU.
-- Korean Government. (2026). *Act on the Development of AI and Establishment of Trust Foundation* (Law No. 21311).
-- Confident AI. (2023). *DeepEval: The open-source LLM evaluation framework*. https://github.com/confident-ai/deepeval
-- Zheng et al. (2023). Judging LLM-as-a-judge with MT-bench and chatbot arena. *NeurIPS 2023*.
+- NIST. (2023). *AI Risk Management Framework (AI RMF 1.0)*.
+  https://doi.org/10.6028/NIST.AI.100-1
+- European Parliament. (2024). *Regulation (EU) 2024/1689*
+  (EU AI Act). Official Journal of the EU.
+- Korean Government. (2026). *Act on the Development of AI
+  and Establishment of Trust Foundation* (Law No. 21311).
+- Tang & Yang. (2024). MultiHop-RAG: Benchmarking RAG for
+  multi-hop queries. *COLM 2024*.
+- Chan et al. (2024). RQ-RAG: Learning to refine queries
+  for retrieval-augmented generation. *EMNLP 2024*.
+- Tan et al. (2025). JudgeBench: A benchmark for evaluating
+  LLM-based judges. *ICLR 2025*.
+- Zheng et al. (2023). Judging LLM-as-a-judge with MT-bench
+  and chatbot arena. *NeurIPS 2023*.
+- Confident AI. (2023). *DeepEval: The open-source LLM
+  evaluation framework*.
+  https://github.com/confident-ai/deepeval
+```
