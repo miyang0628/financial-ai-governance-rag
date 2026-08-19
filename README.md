@@ -1,6 +1,6 @@
 # LLM-Powered AI Governance Support Chatbot for Financial Institutions
 
-> An LLM-based RAG chatbot for financial institution AI Review Committees, integrating three AI governance frameworks: NIST AI RMF 1.0, EU AI Act (Regulation 2024/1689), and Korean AI Basic Act (Law No. 21311).
+> An LLM-based RAG chatbot for financial institution AI Review Committees, integrating five AI governance frameworks spanning a deliberate pre-training exposure spectrum: NIST AI RMF 1.0, EU AI Act (Regulation 2024/1689), Korean AI Basic Act (Law No. 21311), Brazil PL 2338/2023, and Japan AI Promotion Act.
 
 ---
 
@@ -13,12 +13,16 @@
 
 ## Overview
 
-This repository contains the full experimental pipeline for an LLM-powered RAG chatbot designed to support AI governance decision-making in financial institutions. The system integrates three regulatory frameworks and evaluates chatbot responses across a four-axis governance evaluation framework (G1-G4).
+This repository contains the full experimental pipeline for an LLM-powered RAG chatbot designed to support AI governance decision-making in financial institutions. The system integrates five regulatory frameworks and evaluates chatbot responses across a four-axis governance evaluation framework (G1-G4).
+
+The five frameworks are chosen to separate two variables that a naive study confounds: a regulation's **pre-training exposure** (how visible it is to an LLM from pre-training) and its **regulatory strength** (whether it imposes concrete, enforceable duties). NIST and the EU AI Act sit at the high-exposure end; the Korean AI Basic Act and Brazil PL 2338 are low-exposure but high-strength; the Japan AI Promotion Act is low-exposure and low-strength (a promotional statute with no risk classification, no financial-AI duties, and no penalties), serving as a strength control.
 
 **Key contributions:**
-- A cross-regulatory mapping framework across 18 governance dimensions (NIST AI RMF x EU AI Act x Korean AI Basic Act)
-- A domain-specific Q&A dataset (N=300) covering financial AI governance scenarios across three regulatory frameworks
+- A cross-regulatory mapping framework across 18 governance dimensions
+- A domain-specific Q&A dataset (N=482) covering financial AI governance scenarios across five regulatory frameworks, built on 91 shared scenarios for aligned cross-regulatory comparison
 - A four-axis governance evaluation framework (G1: Accuracy, G2: Safety, G3: Transparency, G4: Compliance)
+- **Two RAG-benefit pathways identified** — an *exposure pathway* (lower pre-training exposure → larger RAG benefit; corpus-frequency exposure vs RAG benefit r = -0.86 across the four non-outlier frameworks) and a *strength pathway* (a promotional statute induces systematic baseline hallucination that retrieval corrects)
+- **Cross-evaluator robustness analysis** showing that LLM-as-judge Safety (G2) scoring carries an evaluator-specific bias that persists across model generation and scale
 - Extended comparative experiment across six retrieval conditions: Baseline, RAG (k=1/3/5), RAG+Query Rewriting, RAG+Re-ranking
 - Model-scale comparison: gpt-4o-mini vs. gpt-4o (n=90 stratified sample)
 
@@ -36,26 +40,35 @@ This repository contains the full experimental pipeline for an LLM-powered RAG c
     |   |   +-- kr_aibasicact_dataset_151_200.json
     |   |   +-- eu_aiact_dataset_201_250.json
     |   |   +-- eu_aiact_dataset_251_300.json
+    |   |   +-- br_pl2338_dataset_301_350.json          (Brazil, 50)
+    |   |   +-- br_pl2338_dataset_351_391.json          (Brazil, 41)
+    |   |   +-- jp_aipromotion_dataset_401_450.json     (Japan, 50)
+    |   |   +-- jp_aipromotion_dataset_451_491.json     (Japan, 41)
     |   +-- processed/
+    |   |   +-- dataset_final.json                      (merged, N=482)
     |   +-- regulations/
     |       +-- nist_rmf_md.md
     |       +-- kr_aibasicact_md.md
     |       +-- eu_aiact_articles.md
+    |       +-- br_pl2338_articles.md                   (Brazil corpus)
+    |       +-- jp_aipromotion_md.md                    (Japan corpus)
     |
     +-- notebooks/
     |   +-- 01_data_merge_and_eda.ipynb        Dataset merge and EDA
-    |   +-- 02_rag_pipeline.ipynb              ChromaDB vector store construction
+    |   +-- 02_rag_pipeline.ipynb              ChromaDB vector store construction (5 regs)
     |   +-- 03_llm_inference.ipynb             Baseline and RAG (k=3) inference
     |   +-- 04_evaluation_g1_g4.ipynb          G1-G4 automated evaluation (primary)
     |   +-- 05_deepeval_validation.ipynb       DeepEval validity verification
     |   +-- 06_llm_as_judge.ipynb              LLM-as-Judge quality evaluation
     |   +-- 07_governance_score.ipynb          Composite score and visualization
-    |   +-- 08_evaluator_robustness.ipynb      Inter-evaluator robustness check
+    |   +-- 08_evaluator_robustness.ipynb      Inter-evaluator robustness (gpt-4o-mini vs gpt-4o)
     |   +-- 09_rag_topk_variants.ipynb         Top-k ablation (k=1 and k=5)
     |   +-- 10_rag_query_rewriting.ipynb       RAG + LLM query rewriting
     |   +-- 11_rag_model_comparison.ipynb      Model comparison (gpt-4o-mini vs gpt-4o)
     |   +-- 12_rag_reranking.ipynb             RAG + cross-encoder re-ranking
     |   +-- 13_extended_evaluation.ipynb       Extended G1-G4 evaluation and ranking
+    |   +-- 14_exposure_analysis.ipynb         Corpus-exposure vs RAG-benefit (Claim A)
+    |   +-- 15_cross_evaluator.ipynb           Multi-evaluator robustness (Claim B)
     |
     +-- prompts/
     |   +-- system_prompt_chatbot.txt
@@ -74,18 +87,7 @@ This repository contains the full experimental pipeline for an LLM-powered RAG c
     |
     +-- results/
     |   +-- responses/
-    |   |   +-- responses_baseline.json
-    |   |   +-- responses_rag.json                RAG k=3 primary
-    |   |   +-- responses_rag_k1.json
-    |   |   +-- responses_rag_k5.json
-    |   |   +-- responses_rag_rewrite.json
-    |   |   +-- responses_rag_rerank.json
-    |   |   +-- responses_rag_gpt4o.json
-    |   |   +-- responses_rag_mini_sample.json
     |   +-- scores/
-    |   |   +-- scores_all.csv                    Primary experiment
-    |   |   +-- scores_extended.csv               Extended conditions
-    |   |   +-- scores_merged.csv                 All conditions merged
     |   +-- tables/
     |   +-- figures/
     |
@@ -97,24 +99,34 @@ This repository contains the full experimental pipeline for an LLM-powered RAG c
 
 ---
 
+## Regulatory Frameworks and Exposure Spectrum
+
+| Framework | Language | Legal status | Pre-training exposure | Role in design |
+|---|---|---|---|---|
+| NIST AI RMF 1.0 | English | In force (2023) | High | Spectrum top |
+| EU AI Act 2024/1689 | English | In force (2024) | High | Spectrum top |
+| Korean AI Basic Act | Korean | In force (2026) | Low | Low-exposure, high-strength |
+| Brazil PL 2338/2023 | Portuguese | Senate-approved, pending Chamber | Very low | Bottom extreme (newest) |
+| Japan AI Promotion Act | Japanese | In force (2025) | Low | Strength control (no duties) |
+
+Pre-training exposure is quantified as the corpus frequency of each framework's name (English + native-language + core terms) in a public pre-training corpus. Exposure counts and measurement details are reported in the paper. Note: Brazil PL 2338 is labelled throughout as near-enacted (Senate consolidated text); Chamber amendments may alter provisions.
+
+---
+
 ## Experimental Conditions
 
 | Condition | N | Description |
 |---|---|---|
-| Baseline | 300 | gpt-4o-mini, parametric knowledge only, no retrieval |
-| RAG (k=1) | 300 | RAG with top-1 retrieved chunk |
-| RAG (k=3) | 300 | RAG with top-3 chunks, primary condition |
-| RAG (k=5) | 300 | RAG with top-5 chunks |
-| RAG + Query Rewriting | 300 | LLM rewrites query before retrieval, top-3 |
-| RAG + Re-ranking | 300 | Retrieve top-5, cross-encoder re-ranks to top-3 |
-| RAG gpt-4o-mini (n=90) | 90 | Stratified sample, RAG k=3, gpt-4o-mini |
-| RAG gpt-4o (n=90) | 90 | Stratified sample, RAG k=3, gpt-4o |
+| Baseline | 482 | gpt-4o-mini, parametric knowledge only, no retrieval |
+| RAG (k=3) | 482 | RAG with top-3 chunks, primary condition |
+
+Retrieval-architecture ablations (top-k, query rewriting, re-ranking, model-scale) were run on the original three-framework set (N=300 per condition); the two added frameworks (Brazil, Japan) were evaluated under Baseline and RAG (k=3).
 
 **Shared configuration:**
 
 | Item | Value |
 |---|---|
-| LLM | gpt-4o-mini (gpt-4o for model comparison) |
+| Generator LLM | gpt-4o-mini (gpt-4o for model comparison) |
 | Embedding | text-embedding-3-small |
 | Vector DB | ChromaDB persistent |
 | Chunking | MarkdownHeaderTextSplitter section/article level |
@@ -126,19 +138,20 @@ This repository contains the full experimental pipeline for an LLM-powered RAG c
 
 ## Dataset
 
-| Regulation | N | Difficulty | Avg GT Length |
-|---|---|---|---|
-| NIST AI RMF 1.0 | 100 | Basic 18% / Intermediate 47% / Advanced 35% | 1,308 chars |
-| Korean AI Basic Act | 100 | Basic 21% / Intermediate 51% / Advanced 28% | 1,597 chars |
-| EU AI Act 2024/1689 | 100 | Basic 15% / Intermediate 52% / Advanced 33% | 1,882 chars |
+Dataset construction follows Design Scheme B: 91 shared financial AI governance scenarios (S001-S091) are addressed from the perspective of each regulatory framework, enabling aligned cross-regulatory comparison across identical scenarios.
+
+| Regulation | N | Basis |
+|---|---|---|
+| NIST AI RMF 1.0 | 100 | Q001-Q100 |
+| Korean AI Basic Act | 100 | Q101-Q200 |
+| EU AI Act 2024/1689 | 100 | Q201-Q300 |
+| Brazil PL 2338/2023 | 91 | Q301-Q391 (S001-S091) |
+| Japan AI Promotion Act | 91 | Q401-Q491 (S001-S091) |
+| **Total** | **482** | 0 ID collisions |
 
 Each record contains: id, scenario_id, regulation, function, category, subcategory, difficulty, financial_domain, risk_level, source_section, question, ground_truth, legal_basis, governance_axis, notes
 
-Financial domains: common (64%), lending (24%), insurance (4.3%), investment (3.3%), fraud detection (2.3%), compliance (2.0%)
-
-Governance axis distribution: G1 11.0%, G2 20.3%, G3 18.3%, G4 50.3%
-
-Unique scenarios: 91. Total unique functional categories: 23.
+Non-English corpora (Portuguese, Japanese) were drafted with AI-assisted translation and verified by the authors against primary legal sources. Brazil provisions were confirmed against the official Senate consolidated text; Japan's promotional-statute character was confirmed against the official government outline.
 
 ---
 
@@ -151,81 +164,68 @@ Unique scenarios: 91. Total unique functional categories: 23.
 | G3 | Transparency | 0.25 | Regulatory citation accuracy, AI disclosure |
 | G4 | Compliance | 0.20 | Regulatory requirement coverage |
 
-Composite Score (primary experiment):
-S_comp = 0.70 x S_gov + 0.30 x S_judge_norm
-
-where S_gov = 0.30 x G1 + 0.25 x G2 + 0.25 x G3 + 0.20 x G4
-
-Extended conditions are reported using S_gov alone.
+S_gov = 0.30 x G1 + 0.25 x G2 + 0.25 x G3 + 0.20 x G4
 
 ---
 
 ## Key Results
 
-### Primary Experiment: Baseline vs. RAG (k=3)
+### Primary Experiment: Baseline vs. RAG (k=3), Five Frameworks
 
-| Condition | NIST AI RMF | Korean AI Basic Act | EU AI Act | Overall |
-|---|---|---|---|---|
-| Baseline | 0.761 | 0.748 | 0.777 | 0.762 |
-| RAG (k=3) | 0.788 | 0.841 | 0.819 | 0.816 |
-| Delta | +0.027 | +0.093 | +0.042 | +0.054 (+7.10%) |
+| Regulation | Baseline S_gov | RAG S_gov | Delta |
+|---|---|---|---|
+| EU AI Act | 0.782 | 0.829 | +0.048 |
+| NIST AI RMF | 0.764 | 0.784 | +0.020 |
+| Korean AI Basic Act | 0.753 | 0.855 | +0.101 |
+| Brazil PL 2338 | 0.750 | 0.876 | +0.126 |
+| Japan AI Promotion Act | 0.341 | 0.878 | +0.537 |
 
-### Extended Comparison: All Conditions (S_gov, N=300)
+### Two RAG-Benefit Pathways
 
-| Condition | S_gov | Delta vs Baseline |
-|---|---|---|
-| Baseline | 0.766 | --- |
-| RAG (k=1) | 0.782 | +0.016 |
-| RAG (k=3) | 0.823 | +0.057 |
-| RAG (k=5) | 0.838 | +0.072 |
-| RAG + Rewrite | 0.817 | +0.051 |
-| RAG + Rerank | 0.815 | +0.049 |
+**Exposure pathway.** Across the four frameworks with normal baselines (EU, NIST, Korea, Brazil), RAG benefit scales inversely with pre-training exposure: corpus-frequency exposure vs RAG benefit gives r = -0.86 (R^2 = 0.74, n=4). Brazil is the clean control — same near-zero exposure as Japan but a normal baseline (0.750) and no hallucination collapse, yet a larger RAG benefit (+0.126) than the high-exposure EU (+0.048) and NIST (+0.020). This isolates exposure from strength.
 
-Key finding: Retrieval depth (top-k) is the dominant performance driver. Query rewriting and re-ranking offer negligible benefit over RAG (k=3) under section-level chunking, because chunk granularity is the binding constraint.
+**Strength pathway (Japan).** The Japan AI Promotion Act is a promotional statute whose correct ground truth is usually "no specific duty." Without retrieval, the baseline model hallucinates non-existent obligations: 70.3% of Japan baseline items score G1 <= 0.2, versus <= 2% for every other framework. Retrieval supplies the actual "no duty" content, producing an outlier RAG benefit (+0.537) driven by hallucination correction rather than exposure. Japan is therefore reported as a separate mechanism and excluded from the exposure regression.
 
-### Top-k Ablation by Regulation (S_gov)
+| Framework | Baseline hallucination rate (G1 <= 0.2) |
+|---|---|
+| NIST AI RMF | 0.0% |
+| EU AI Act | 2.0% |
+| Korean AI Basic Act | 1.0% |
+| Brazil PL 2338 | 1.1% |
+| Japan AI Promotion Act | 70.3% |
 
-| Regulation | Baseline | RAG k=1 | RAG k=3 | RAG k=5 |
-|---|---|---|---|---|
-| NIST AI RMF | 0.764 | 0.744 | 0.785 | 0.814 |
-| Korean AI Basic Act | 0.753 | 0.798 | 0.855 | 0.864 |
-| EU AI Act | 0.782 | 0.805 | 0.829 | 0.835 |
-| Overall | 0.766 | 0.782 | 0.823 | 0.838 |
+### Cross-Evaluator Robustness (Claim B)
 
-### Model-Scale Comparison (RAG k=3, n=90)
+The same generator (gpt-4o-mini) responses were re-scored by newer OpenAI evaluators (gpt-5.4-mini, gpt-5.4) on a stratified sample. Excluding Japan (n=40), inter-evaluator agreement by axis:
 
-| Model | G1 | G2 | G3 | G4 | S_gov |
-|---|---|---|---|---|---|
-| gpt-4o-mini | 0.724 | 0.949 | 0.867 | 0.831 | 0.837 |
-| gpt-4o | 0.707 | 0.904 | 0.862 | 0.793 | 0.812 |
+| Axis | r (4o-mini vs 5.4-mini) | r (4o-mini vs 5.4) | Mean |
+|---|---|---|---|
+| G1 Accuracy | +0.64 | +0.64 | +0.64 |
+| G2 Safety | +0.45 | +0.21 | +0.33 |
+| G3 Transparency | +0.42 | +0.51 | +0.47 |
+| G4 Compliance | +0.70 | +0.65 | +0.67 |
 
-Note: G2 difference is attributable to evaluator-specific inflation (same model as generator and judge), not genuine safety guidance quality. G3 Transparency scores are nearly identical (0.867 vs. 0.862), confirming that citation accuracy is retrieval-driven rather than model-scale-driven.
+G2 Safety shows the weakest cross-generation agreement. In mean scores, gpt-4o-mini assigns G2 = 0.955 versus 0.55-0.63 for the newer evaluators, indicating a Safety-axis inflation that persists across model generation and scale. This suggests LLM-as-judge Safety scoring is particularly vulnerable to evaluator-specific bias — a caution for automated governance-evaluation pipelines.
 
-### DeepEval Validity (n=180, primary experiment)
-
-| Condition | AnswerRelevancy | Pass Rate | Faithfulness | Pass Rate |
-|---|---|---|---|---|
-| Baseline | 0.943-0.972 | 100% | N/A | N/A |
-| RAG (k=3) | 0.944-0.972 | 100% | 0.863-0.993 | 96.6-100% |
+**Limitations of this analysis:** the stratified sample is small (n=40 excluding Japan), so axis differences are directional rather than statistically conclusive. All three evaluators are OpenAI models, so same-provider bias is not eliminated; cross-provider validation (e.g., Claude, Llama, Mistral) remains future work.
 
 ---
 
 ## Setup
 
-### 1. Clone the repository
+### 1. Obtain the repository
 
-    git clone https://github.com/miyang0628/financial-ai-governance-rag.git
-    cd financial-ai-governance-rag
+The anonymized repository is available at the anonymous submission link provided with the manuscript.
 
 ### 2. Environment setup
 
 Two separate conda environments are required.
 
-Environment 1: LLM inference and evaluation (Notebooks 01-04, 06-13)
+Environment 1: LLM inference and evaluation (Notebooks 01-04, 06-15)
 
     conda create -n llm_env python=3.11 -y
     conda activate llm_env
-    pip install jupyter notebook ipykernel pandas numpy python-dotenv tqdm scikit-learn openai>=1.30.0 langchain langchain-openai langchain-community langchain-text-splitters langchain-chroma chromadb faiss-cpu tiktoken matplotlib seaborn plotly sentence-transformers
+    pip install jupyter notebook ipykernel pandas numpy python-dotenv tqdm scikit-learn scipy openai>=1.30.0 langchain langchain-openai langchain-community langchain-text-splitters langchain-chroma chromadb faiss-cpu tiktoken matplotlib seaborn plotly sentence-transformers
     python -m ipykernel install --user --name llm_env --display-name "Python (llm_env)"
 
 Environment 2: DeepEval validation (Notebook 05)
@@ -244,22 +244,24 @@ Edit .env and add:
     OPENAI_API_KEY=sk-...
     LLM_MODEL=gpt-4o-mini
 
-### 4. Run notebooks in order
+### 4. Run order
 
-Primary experiment (Notebooks 01-08):
+Core pipeline (five frameworks):
 
 | Notebook | Kernel | Description |
 |---|---|---|
 | 01_data_merge_and_eda | llm_env | Dataset merge and EDA |
-| 02_rag_pipeline | llm_env | Build ChromaDB vector stores |
+| 02_rag_pipeline | llm_env | Build ChromaDB vector stores (5 regs) |
 | 03_llm_inference | llm_env | Baseline and RAG (k=3) inference |
 | 04_evaluation_g1_g4 | llm_env | G1-G4 automated evaluation |
 | 05_deepeval_validation | deepeval_env | DeepEval validity check |
 | 06_llm_as_judge | llm_env | LLM-as-Judge quality evaluation |
 | 07_governance_score | llm_env | Composite score and visualization |
-| 08_evaluator_robustness | llm_env | Inter-evaluator robustness check |
+| 08_evaluator_robustness | llm_env | Inter-evaluator robustness (gpt-4o-mini vs gpt-4o) |
+| 14_exposure_analysis | llm_env | Corpus-exposure vs RAG-benefit (Claim A) |
+| 15_cross_evaluator | llm_env | Multi-evaluator robustness (Claim B) |
 
-Extended experiment (Notebooks 09-13):
+Retrieval-architecture ablations (original three-framework set):
 
 | Notebook | Kernel | Description |
 |---|---|---|
@@ -269,75 +271,39 @@ Extended experiment (Notebooks 09-13):
 | 12_rag_reranking | llm_env | RAG + cross-encoder re-ranking |
 | 13_extended_evaluation | llm_env | Extended G1-G4 evaluation and ranking |
 
-Note: Notebooks 09-12 must be run before 13. Notebook 03 must be run before 09-12 (shares vector stores and response files).
+Notes: Notebook 03 must run before 09-12 (shared vector stores and response files). Notebooks 09-12 must run before 13. Notebook 14 reads scores produced by 04; Notebook 15 requires the merged response files from 03 and scores from 04.
 
 ---
 
-## Estimated API Cost
+## API Cost
 
-Primary experiment (Notebooks 01-08):
+Costs scale with the OpenAI models used and their current published rates; verify pricing before running. Approximate token volumes:
 
-| Notebook | Tokens | Estimated Cost |
-|---|---|---|
-| 03 Inference Baseline | 188,812 | $0.03 |
-| 03 Inference RAG k=3 | 613,318 | $0.09 |
-| 04 G1-G4 Evaluation | ~480,000 | ~$0.07 |
-| 05 DeepEval | ~180,000 | ~$0.03 |
-| 06 LLM-as-Judge | 799,653 | $0.12 |
-| Primary Total | ~2,260,000 | ~$0.34 |
+| Stage | Approx. tokens |
+|---|---|
+| Inference (Baseline + RAG, 5 frameworks) | ~1.5M |
+| G1-G4 evaluation (5 frameworks) | ~0.6M |
+| LLM-as-Judge (primary experiment) | ~0.8M |
+| Retrieval ablations (top-k, rewrite, rerank) | ~2.5M |
+| Model-scale comparison (gpt-4o, n=90) | ~0.2M |
+| Cross-evaluator (gpt-5.4-mini, gpt-5.4; n=50) | ~0.1M |
 
-Extended experiment (Notebooks 09-13):
-
-| Notebook | Tokens | Estimated Cost |
-|---|---|---|
-| 09 RAG k=1 | 319,664 | $0.05 |
-| 09 RAG k=5 | 908,394 | $0.14 |
-| 10 RAG + Rewrite | 697,550 | $0.10 |
-| 11 RAG gpt-4o n=90 | 184,800 | $0.92 |
-| 12 RAG + Rerank | 605,759 | $0.09 |
-| 13 Extended Evaluation | ~1,104,000 | ~$0.17 |
-| Extended Total | ~3,820,000 | ~$1.47 |
-
-Grand Total: ~6,080,000 tokens / ~$1.81
-
-gpt-4o-mini: $0.15/1M tokens blended rate. gpt-4o: $5.00/1M tokens blended rate. As of 2025.
-
----
-
-## Dependencies
-
-llm_env (Notebooks 01-04, 06-13):
-
-    openai>=1.30.0
-    langchain langchain-openai langchain-community
-    langchain-text-splitters langchain-chroma
-    chromadb faiss-cpu tiktoken
-    pandas numpy matplotlib seaborn plotly
-    python-dotenv tqdm scikit-learn
-    sentence-transformers
-
-deepeval_env (Notebook 05):
-
-    openai>=1.30.0
-    deepeval
-    pandas numpy python-dotenv tqdm
+The cross-evaluator notebook (15) calls newer, higher-priced models on a small stratified sample; total cost there is a few dollars at current rates. The model-scale comparison (11) uses gpt-4o and is the most expensive per token — confirm before running.
 
 ---
 
 ## Notes
 
-- vectordb/ is generated by Notebook 02 and excluded from the repository via .gitignore
-- results/ is generated by Notebooks 03-13 and excluded from the repository
-- All notebooks use temperature=0.0 for reproducibility
-- The re-ranker (cross-encoder/ms-marco-MiniLM-L-6-v2) downloads automatically via sentence-transformers on first use with no additional API cost
-- Notebook 11 (gpt-4o comparison) incurs approximately $0.92 in API cost; confirm before running
-- The Korean AI Basic Act source corpus is an interpretive English translation prepared by the authors; no official English translation exists as of the time of writing
+- vectordb/ and results/ are generated by the notebooks and excluded via .gitignore
+- All notebooks use temperature=0.0 for reproducibility where the model supports it. Newer evaluator models (gpt-5.4 family) use max_completion_tokens and may not accept temperature=0; Notebook 15 adapts automatically and this is disclosed in the paper's Methods.
+- The Korean, Brazilian (Portuguese), and Japanese source corpora involve author translation/verification against primary legal sources; the non-English translation procedure and its limitations are documented in the paper.
+- Brazil PL 2338 is near-enacted (Senate consolidated text); Chamber amendments may alter provisions. Japan article numbering is verified at the statute-structure level against the official outline.
 
 ---
 
 ## License
 
-This repository is released for academic reproducibility purposes. The regulatory source documents (NIST AI RMF, EU AI Act, Korean AI Basic Act) are publicly available government documents.
+This repository is released for academic reproducibility purposes. The regulatory source documents are publicly available government documents.
 
 ---
 
@@ -346,6 +312,8 @@ This repository is released for academic reproducibility purposes. The regulator
 - NIST. (2023). AI Risk Management Framework (AI RMF 1.0). https://doi.org/10.6028/NIST.AI.100-1
 - European Parliament. (2024). Regulation (EU) 2024/1689 (EU AI Act). Official Journal of the EU.
 - Korean Government. (2026). Act on the Development of AI and Establishment of Trust Foundation (Law No. 21311).
+- Brazil Federal Senate. (2023). PL 2338/2023 (AI regulatory framework), Senate consolidated text.
+- Japan. (2025). Act on Promotion of Research and Development and Utilization of AI-related Technology.
 - Tang and Yang. (2024). MultiHop-RAG: Benchmarking RAG for multi-hop queries. COLM 2024.
 - Chan et al. (2024). RQ-RAG: Learning to refine queries for retrieval-augmented generation. EMNLP 2024.
 - Tan et al. (2025). JudgeBench: A benchmark for evaluating LLM-based judges. ICLR 2025.
