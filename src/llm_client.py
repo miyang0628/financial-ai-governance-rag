@@ -1,1 +1,0 @@
-# OpenAI API 호출 래퍼
